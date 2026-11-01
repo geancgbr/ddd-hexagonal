@@ -8,7 +8,6 @@ import io.github.geancgbr.orders.domain.shared.DomainEvent;
 import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Money;
 import io.github.geancgbr.orders.domain.shared.Quantity;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,17 +94,12 @@ public class Order {
     }
 
     public Money discount() {
-        if (coupon == null) {
-            return Money.ZERO;
-        }
-        return new Money(subtotal()
-                .amount()
-                .multiply(BigDecimal.valueOf(coupon.percentage()))
-                .divide(BigDecimal.valueOf(100)));
+        return coupon().map(applied -> subtotal().percentage(applied.percentage()))
+                .orElse(Money.ZERO);
     }
 
     public Money total() {
-        return new Money(subtotal().amount().subtract(discount().amount()));
+        return subtotal().minus(discount());
     }
 
     public List<DomainEvent> pullEvents() {

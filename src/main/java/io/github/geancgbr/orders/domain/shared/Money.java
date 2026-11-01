@@ -27,4 +27,12 @@ public record Money(BigDecimal amount) {
     public Money times(int factor) {
         return new Money(amount.multiply(BigDecimal.valueOf(factor)));
     }
+
+    public Money minus(Money other) {
+        return new Money(amount.subtract(other.amount));
+    }
+
+    public Money percentage(int percent) {
+        return new Money(amount.multiply(BigDecimal.valueOf(percent)).movePointLeft(2));
+    }
 }
