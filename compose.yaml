@@ -24,3 +24,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  k6:
+    image: grafana/k6:2.3.0
+    profiles: ["load"]
+    environment:
+      API: http://app:8080
+    volumes:
+      - ./load-tests:/scripts:ro
+    depends_on:
+      - app

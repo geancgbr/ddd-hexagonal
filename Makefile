@@ -1,10 +1,13 @@
-.PHONY: test format up down logs demo
+.PHONY: test format coverage up down logs demo load stress
 
 test:
 	./mvnw -B verify
 
 format:
 	./mvnw -B spotless:apply
+
+coverage: test
+	open target/site/jacoco/index.html
 
 up:
 	docker compose up -d --build --wait
@@ -17,3 +20,9 @@ logs:
 
 demo:
 	./scripts/demo.sh
+
+load:
+	docker compose --profile load run --rm k6 run /scripts/carga.js
+
+stress:
+	docker compose --profile load run --rm k6 run /scripts/estresse.js
