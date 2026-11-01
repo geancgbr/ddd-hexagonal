@@ -3,6 +3,7 @@ package io.github.geancgbr.orders.application.service;
 import io.github.geancgbr.orders.application.port.in.CatalogUseCases.DeactivateProduct;
 import io.github.geancgbr.orders.application.port.in.CatalogUseCases.ListProducts;
 import io.github.geancgbr.orders.application.port.in.CatalogUseCases.RegisterProduct;
+import io.github.geancgbr.orders.application.port.in.CatalogUseCases.SearchProducts;
 import io.github.geancgbr.orders.domain.product.Product;
 import io.github.geancgbr.orders.domain.product.ProductId;
 import io.github.geancgbr.orders.domain.product.ProductRepository;
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public class CatalogApplicationService implements RegisterProduct, DeactivateProduct, ListProducts {
+public class CatalogApplicationService implements RegisterProduct, DeactivateProduct, ListProducts, SearchProducts {
 
     private final ProductRepository products;
 
@@ -35,5 +36,10 @@ public class CatalogApplicationService implements RegisterProduct, DeactivatePro
     @Override
     public List<Product> list() {
         return products.findAll();
+    }
+
+    @Override
+    public List<Product> search(String term) {
+        return products.searchByName(term);
     }
 }

@@ -37,6 +37,13 @@ class JpaProductRepositoryAdapter implements ProductRepository {
                 .toList();
     }
 
+    @Override
+    public List<Product> searchByName(String term) {
+        return jpa.findByNameContainingIgnoreCaseOrderByName(term).stream()
+                .map(JpaProductRepositoryAdapter::toDomain)
+                .toList();
+    }
+
     private static Product toDomain(ProductJpaEntity entity) {
         return Product.restore(new ProductId(entity.id), entity.name, new Money(entity.price), entity.active);
     }

@@ -55,6 +55,13 @@ public final class InMemoryAdapters {
         public List<Product> findAll() {
             return List.copyOf(data.values());
         }
+
+        @Override
+        public List<Product> searchByName(String term) {
+            return data.values().stream()
+                    .filter(product -> product.name().toLowerCase().contains(term.toLowerCase()))
+                    .toList();
+        }
     }
 
     public static final class Coupons implements CouponCatalog {

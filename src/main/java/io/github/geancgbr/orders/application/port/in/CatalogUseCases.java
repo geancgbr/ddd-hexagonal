@@ -17,6 +17,10 @@ public final class CatalogUseCases {
         void deactivate(UUID productId);
     }
 
+    public interface SearchProducts {
+        List<Product> search(String term);
+    }
+
     public interface ListProducts {
         List<Product> list();
     }
