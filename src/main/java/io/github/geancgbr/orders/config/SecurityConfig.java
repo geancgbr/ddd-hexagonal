@@ -11,6 +11,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 class SecurityConfig {
 
     @Bean
+    @SuppressWarnings("java:S4502")
     SecurityFilterChain api(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

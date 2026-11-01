@@ -44,7 +44,22 @@ services:
     depends_on:
       - app
 
+  sonarqube:
+    image: sonarqube:26.10.0.133078-community
+    profiles: ["sonar"]
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+    networks:
+      - frontend
+
 networks:
   frontend:
   backend:
     internal: true
+
+volumes:
+  sonarqube-data:

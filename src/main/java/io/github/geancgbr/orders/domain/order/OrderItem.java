@@ -5,7 +5,7 @@ import io.github.geancgbr.orders.domain.shared.Money;
 import io.github.geancgbr.orders.domain.shared.Quantity;
 import java.util.Objects;
 
-public class OrderItem {
+public final class OrderItem {
 
     private final ProductId productId;
     private final Money unitPrice;

@@ -1,4 +1,4 @@
-.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses
+.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses sonar
 
 test:
 	./mvnw -B verify
@@ -41,3 +41,6 @@ deps: sbom
 licenses: sbom
 	docker run --rm -v "$(CURDIR)":/src -v trivy-cache:/root/.cache aquasec/trivy:0.76.1 \
 		sbom --quiet --scanners license /src/target/bom.json 2>/dev/null
+
+sonar:
+	./scripts/sonar.sh

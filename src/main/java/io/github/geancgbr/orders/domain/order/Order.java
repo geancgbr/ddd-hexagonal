@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Order {
+public final class Order {
 
     public static final int MAX_DISTINCT_PRODUCTS = 10;
 

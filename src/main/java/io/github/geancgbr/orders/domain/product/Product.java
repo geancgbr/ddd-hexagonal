@@ -4,7 +4,7 @@ import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Money;
 import java.util.Objects;
 
-public class Product {
+public final class Product {
 
     private final ProductId id;
     private final String name;
