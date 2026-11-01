@@ -63,9 +63,7 @@ public class Order {
 
     public void place() {
         requireStatus(OrderStatus.DRAFT, "Só um pedido em rascunho pode ser fechado");
-        if (items.isEmpty()) {
-            throw new DomainException("Pedido sem itens não pode ser fechado");
-        }
+        requireItems("Pedido sem itens não pode ser fechado");
         status = OrderStatus.PLACED;
         events.add(new OrderPlaced(id, customerId, total(), items.size(), Instant.now()));
     }
@@ -83,9 +81,7 @@ public class Order {
 
     public void applyCoupon(Coupon coupon) {
         requireStatus(OrderStatus.DRAFT, "Só é possível aplicar cupom em um pedido em rascunho");
-        if (items.isEmpty()) {
-            throw new DomainException("Pedido sem itens não aceita cupom");
-        }
+        requireItems("Pedido sem itens não aceita cupom");
         if (this.coupon != null) {
             throw new DomainException("Pedido já tem um cupom: " + this.coupon.code());
         }
@@ -117,6 +113,12 @@ public class Order {
 
     private Optional<OrderItem> findItem(ProductId productId) {
         return items.stream().filter(item -> item.productId().equals(productId)).findFirst();
+    }
+
+    private void requireItems(String message) {
+        if (items.isEmpty()) {
+            throw new DomainException(message);
+        }
     }
 
     private void requireStatus(OrderStatus expected, String message) {
