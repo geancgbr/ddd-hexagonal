@@ -82,7 +82,14 @@ public class Order {
     }
 
     public void applyCoupon(Coupon coupon) {
-        this.coupon = coupon;
+        requireStatus(OrderStatus.DRAFT, "Só é possível aplicar cupom em um pedido em rascunho");
+        if (items.isEmpty()) {
+            throw new DomainException("Pedido sem itens não aceita cupom");
+        }
+        if (this.coupon != null) {
+            throw new DomainException("Pedido já tem um cupom: " + this.coupon.code());
+        }
+        this.coupon = Objects.requireNonNull(coupon, "coupon");
     }
 
     public Optional<Coupon> coupon() {
