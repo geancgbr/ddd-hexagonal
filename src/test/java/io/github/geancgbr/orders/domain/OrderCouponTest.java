@@ -1,12 +1,14 @@
 package io.github.geancgbr.orders.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.geancgbr.orders.domain.order.Coupon;
 import io.github.geancgbr.orders.domain.order.CustomerId;
 import io.github.geancgbr.orders.domain.order.Order;
 import io.github.geancgbr.orders.domain.order.OrderEvents.OrderPlaced;
 import io.github.geancgbr.orders.domain.product.ProductId;
+import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Money;
 import io.github.geancgbr.orders.domain.shared.Quantity;
 import org.junit.jupiter.api.Test;
@@ -61,5 +63,33 @@ class OrderCouponTest {
                 .singleElement()
                 .isInstanceOfSatisfying(
                         OrderPlaced.class, event -> assertThat(event.total()).isEqualTo(Money.of("180.00")));
+    }
+
+    @Test
+    void only_one_coupon_per_order() {
+        Order order = orderWith("100.00", 2);
+        order.applyCoupon(new Coupon("DESC10", 10));
+
+        assertThatThrownBy(() -> order.applyCoupon(new Coupon("DESC20", 20)))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("já tem um cupom");
+        assertThat(order.discount()).isEqualTo(Money.of("20.00"));
+    }
+
+    @Test
+    void a_placed_order_does_not_accept_coupons() {
+        Order order = orderWith("100.00", 2);
+        order.place();
+
+        assertThatThrownBy(() -> order.applyCoupon(new Coupon("DESC10", 10))).isInstanceOf(DomainException.class);
+    }
+
+    @Test
+    void an_empty_order_does_not_accept_coupons() {
+        Order order = Order.create(new CustomerId("cliente-1"));
+
+        assertThatThrownBy(() -> order.applyCoupon(new Coupon("DESC10", 10)))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("sem itens");
     }
 }
