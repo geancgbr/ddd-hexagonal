@@ -1,5 +1,6 @@
 package io.github.geancgbr.orders.adapter.out.persistence;
 
+import io.github.geancgbr.orders.domain.order.Coupon;
 import io.github.geancgbr.orders.domain.order.CustomerId;
 import io.github.geancgbr.orders.domain.order.Order;
 import io.github.geancgbr.orders.domain.order.OrderId;
@@ -38,8 +39,14 @@ class JpaOrderRepositoryAdapter implements OrderRepository {
                         item.unitPrice().amount(),
                         item.quantity().value()))
                 .toList();
+        Coupon coupon = order.coupon().orElse(null);
         return new OrderJpaEntity(
-                order.id().value(), order.customerId().value(), order.status().name(), items);
+                order.id().value(),
+                order.customerId().value(),
+                order.status().name(),
+                coupon == null ? null : coupon.code(),
+                coupon == null ? null : coupon.percentage(),
+                items);
     }
 
     private static Order toDomain(OrderJpaEntity entity) {
@@ -47,7 +54,12 @@ class JpaOrderRepositoryAdapter implements OrderRepository {
                 .map(item -> new Order.RestoredItem(
                         new ProductId(item.productId), new Money(item.unitPrice), new Quantity(item.quantity)))
                 .toList();
+        Coupon coupon = entity.couponCode == null ? null : new Coupon(entity.couponCode, entity.couponPercentage);
         return Order.restore(
-                new OrderId(entity.id), new CustomerId(entity.customerId), OrderStatus.valueOf(entity.status), items);
+                new OrderId(entity.id),
+                new CustomerId(entity.customerId),
+                OrderStatus.valueOf(entity.status),
+                items,
+                coupon);
     }
 }

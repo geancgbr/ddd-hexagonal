@@ -51,12 +51,17 @@ class OrderApiIntegrationTest {
 
         postJson("/orders/" + orderId + "/items", """
                 {"productId": "%s", "quantity": 2}""".formatted(productId), 200);
+        postJson("/orders/" + orderId + "/coupon", """
+                {"code": "bemvindo10"}""", 200);
         postJson("/orders/" + orderId + "/place", "", 200);
 
         mvc.perform(get("/orders/" + orderId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PLACED"))
-                .andExpect(jsonPath("$.total").value(1799.80))
+                .andExpect(jsonPath("$.couponCode").value("BEMVINDO10"))
+                .andExpect(jsonPath("$.subtotal").value(1799.80))
+                .andExpect(jsonPath("$.discount").value(179.98))
+                .andExpect(jsonPath("$.total").value(1619.82))
                 .andExpect(jsonPath("$.items[0].quantity").value(2));
     }
 

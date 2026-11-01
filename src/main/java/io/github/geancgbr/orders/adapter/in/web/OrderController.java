@@ -1,6 +1,7 @@
 package io.github.geancgbr.orders.adapter.in.web;
 
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.AddItemToOrder;
+import io.github.geancgbr.orders.application.port.in.OrderUseCases.ApplyCoupon;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.CancelOrder;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.CreateOrder;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.GetOrder;
@@ -29,8 +30,11 @@ class OrderController {
 
     record CancelRequest(@NotBlank String reason) {}
 
+    record ApplyCouponRequest(@NotBlank String code) {}
+
     private final CreateOrder createOrder;
     private final AddItemToOrder addItem;
+    private final ApplyCoupon applyCoupon;
     private final PlaceOrder placeOrder;
     private final CancelOrder cancelOrder;
     private final GetOrder getOrder;
@@ -38,11 +42,13 @@ class OrderController {
     OrderController(
             CreateOrder createOrder,
             AddItemToOrder addItem,
+            ApplyCoupon applyCoupon,
             PlaceOrder placeOrder,
             CancelOrder cancelOrder,
             GetOrder getOrder) {
         this.createOrder = createOrder;
         this.addItem = addItem;
+        this.applyCoupon = applyCoupon;
         this.placeOrder = placeOrder;
         this.cancelOrder = cancelOrder;
         this.getOrder = getOrder;
@@ -62,6 +68,11 @@ class OrderController {
     @PostMapping("/{id}/items")
     OrderResponse addItem(@PathVariable UUID id, @Valid @RequestBody AddItemRequest request) {
         return OrderResponse.from(addItem.addItem(new OrderId(id), request.productId(), request.quantity()));
+    }
+
+    @PostMapping("/{id}/coupon")
+    OrderResponse applyCoupon(@PathVariable UUID id, @Valid @RequestBody ApplyCouponRequest request) {
+        return OrderResponse.from(applyCoupon.applyCoupon(new OrderId(id), request.code()));
     }
 
     @PostMapping("/{id}/place")

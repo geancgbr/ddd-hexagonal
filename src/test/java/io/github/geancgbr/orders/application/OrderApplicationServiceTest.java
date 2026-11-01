@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.geancgbr.orders.application.port.out.DomainEventPublisher;
 import io.github.geancgbr.orders.application.service.NotFoundException;
 import io.github.geancgbr.orders.application.service.OrderApplicationService;
+import io.github.geancgbr.orders.domain.order.Coupon;
 import io.github.geancgbr.orders.domain.order.Order;
 import io.github.geancgbr.orders.domain.order.OrderEvents.OrderCreated;
 import io.github.geancgbr.orders.domain.order.OrderEvents.OrderPlaced;
@@ -17,6 +18,7 @@ import io.github.geancgbr.orders.domain.product.Product;
 import io.github.geancgbr.orders.domain.product.ProductId;
 import io.github.geancgbr.orders.domain.product.ProductRepository;
 import io.github.geancgbr.orders.domain.shared.DomainEvent;
+import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Money;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,11 +74,13 @@ class OrderApplicationServiceTest {
         }
     }
 
+    private static final Map<String, Coupon> COUPONS = Map.of("BEMVINDO10", new Coupon("BEMVINDO10", 10));
+
     private final InMemoryOrders orders = new InMemoryOrders();
     private final InMemoryProducts products = new InMemoryProducts();
     private final RecordingPublisher publisher = new RecordingPublisher();
-    private final OrderApplicationService service =
-            new OrderApplicationService(orders, products, new ProductOrderingService(), publisher);
+    private final OrderApplicationService service = new OrderApplicationService(
+            orders, products, new ProductOrderingService(), code -> Optional.ofNullable(COUPONS.get(code)), publisher);
 
     @Test
     void full_flow_saves_the_order_and_publishes_each_event_once() {
@@ -99,5 +103,27 @@ class OrderApplicationServiceTest {
 
         assertThatThrownBy(() -> service.get(OrderId.newId())).isInstanceOf(NotFoundException.class);
         assertThatThrownBy(() -> service.addItem(id, UUID.randomUUID(), 1)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void a_valid_coupon_reduces_the_total() {
+        Product mouse = products.save(Product.register("Mouse", Money.of("100.00")));
+        OrderId id = service.create("cliente-1");
+        service.addItem(id, mouse.id().value(), 1);
+
+        Order order = service.applyCoupon(id, "BEMVINDO10");
+
+        assertThat(order.total()).isEqualTo(Money.of("90.00"));
+    }
+
+    @Test
+    void an_unknown_coupon_is_a_business_error() {
+        Product mouse = products.save(Product.register("Mouse", Money.of("100.00")));
+        OrderId id = service.create("cliente-1");
+        service.addItem(id, mouse.id().value(), 1);
+
+        assertThatThrownBy(() -> service.applyCoupon(id, "NAOEXISTE"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Cupom inválido");
     }
 }

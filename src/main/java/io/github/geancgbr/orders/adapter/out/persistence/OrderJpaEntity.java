@@ -25,16 +25,30 @@ class OrderJpaEntity {
     @Column(nullable = false)
     String status;
 
+    @Column(name = "coupon_code")
+    String couponCode;
+
+    @Column(name = "coupon_percentage")
+    Integer couponPercentage;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
     List<OrderItemEmbeddable> items = new ArrayList<>();
 
     protected OrderJpaEntity() {}
 
-    OrderJpaEntity(UUID id, String customerId, String status, List<OrderItemEmbeddable> items) {
+    OrderJpaEntity(
+            UUID id,
+            String customerId,
+            String status,
+            String couponCode,
+            Integer couponPercentage,
+            List<OrderItemEmbeddable> items) {
         this.id = id;
         this.customerId = customerId;
         this.status = status;
+        this.couponCode = couponCode;
+        this.couponPercentage = couponPercentage;
         this.items = new ArrayList<>(items);
     }
 }

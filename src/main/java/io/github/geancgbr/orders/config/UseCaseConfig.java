@@ -3,6 +3,7 @@ package io.github.geancgbr.orders.config;
 import io.github.geancgbr.orders.application.port.out.DomainEventPublisher;
 import io.github.geancgbr.orders.application.service.CatalogApplicationService;
 import io.github.geancgbr.orders.application.service.OrderApplicationService;
+import io.github.geancgbr.orders.domain.order.CouponCatalog;
 import io.github.geancgbr.orders.domain.order.OrderRepository;
 import io.github.geancgbr.orders.domain.order.ProductOrderingService;
 import io.github.geancgbr.orders.domain.product.ProductRepository;
@@ -22,8 +23,9 @@ class UseCaseConfig {
             OrderRepository orders,
             ProductRepository products,
             ProductOrderingService ordering,
+            CouponCatalog coupons,
             DomainEventPublisher events) {
-        return new OrderApplicationService(orders, products, ordering, events);
+        return new OrderApplicationService(orders, products, ordering, coupons, events);
     }
 
     @Bean

@@ -16,6 +16,10 @@ public final class OrderUseCases {
         Order addItem(OrderId orderId, UUID productId, int quantity);
     }
 
+    public interface ApplyCoupon {
+        Order applyCoupon(OrderId orderId, String couponCode);
+    }
+
     public interface PlaceOrder {
         Order place(OrderId orderId);
     }

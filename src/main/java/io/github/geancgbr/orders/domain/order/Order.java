@@ -39,11 +39,14 @@ public class Order {
         return order;
     }
 
-    public static Order restore(OrderId id, CustomerId customerId, OrderStatus status, List<RestoredItem> items) {
+    public static Order restore(
+            OrderId id, CustomerId customerId, OrderStatus status, List<RestoredItem> items, Coupon coupon) {
         List<OrderItem> restored = items.stream()
                 .map(item -> new OrderItem(item.productId(), item.unitPrice(), item.quantity()))
                 .toList();
-        return new Order(id, customerId, status, restored);
+        Order order = new Order(id, customerId, status, restored);
+        order.coupon = coupon;
+        return order;
     }
 
     public record RestoredItem(ProductId productId, Money unitPrice, Quantity quantity) {}

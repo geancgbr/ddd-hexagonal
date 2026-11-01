@@ -1,11 +1,14 @@
 package io.github.geancgbr.orders.application.service;
 
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.AddItemToOrder;
+import io.github.geancgbr.orders.application.port.in.OrderUseCases.ApplyCoupon;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.CancelOrder;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.CreateOrder;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.GetOrder;
 import io.github.geancgbr.orders.application.port.in.OrderUseCases.PlaceOrder;
 import io.github.geancgbr.orders.application.port.out.DomainEventPublisher;
+import io.github.geancgbr.orders.domain.order.Coupon;
+import io.github.geancgbr.orders.domain.order.CouponCatalog;
 import io.github.geancgbr.orders.domain.order.CustomerId;
 import io.github.geancgbr.orders.domain.order.Order;
 import io.github.geancgbr.orders.domain.order.OrderId;
@@ -14,24 +17,29 @@ import io.github.geancgbr.orders.domain.order.ProductOrderingService;
 import io.github.geancgbr.orders.domain.product.Product;
 import io.github.geancgbr.orders.domain.product.ProductId;
 import io.github.geancgbr.orders.domain.product.ProductRepository;
+import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Quantity;
 import java.util.UUID;
 
-public class OrderApplicationService implements CreateOrder, AddItemToOrder, PlaceOrder, CancelOrder, GetOrder {
+public class OrderApplicationService
+        implements CreateOrder, AddItemToOrder, ApplyCoupon, PlaceOrder, CancelOrder, GetOrder {
 
     private final OrderRepository orders;
     private final ProductRepository products;
     private final ProductOrderingService ordering;
+    private final CouponCatalog coupons;
     private final DomainEventPublisher events;
 
     public OrderApplicationService(
             OrderRepository orders,
             ProductRepository products,
             ProductOrderingService ordering,
+            CouponCatalog coupons,
             DomainEventPublisher events) {
         this.orders = orders;
         this.products = products;
         this.ordering = ordering;
+        this.coupons = coupons;
         this.events = events;
     }
 
@@ -48,6 +56,15 @@ public class OrderApplicationService implements CreateOrder, AddItemToOrder, Pla
         Product product = products.findById(new ProductId(productId))
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado: " + productId));
         ordering.addToOrder(order, product, new Quantity(quantity));
+        return saveAndPublish(order);
+    }
+
+    @Override
+    public Order applyCoupon(OrderId orderId, String couponCode) {
+        Order order = load(orderId);
+        Coupon coupon =
+                coupons.findByCode(couponCode).orElseThrow(() -> new DomainException("Cupom inválido: " + couponCode));
+        order.applyCoupon(coupon);
         return saveAndPublish(order);
     }
 
