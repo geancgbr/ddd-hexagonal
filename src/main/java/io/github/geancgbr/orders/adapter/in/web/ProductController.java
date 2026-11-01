@@ -68,7 +68,11 @@ class ProductController {
     }
 
     @GetMapping
-    List<ProductResponse> list(@RequestParam(required = false) @Size(max = 100) String name) {
+    List<ProductResponse> list(
+            @RequestParam(required = false)
+                    @Size(max = 100)
+                    @Pattern(regexp = InputRules.FREE_TEXT, message = InputRules.FREE_TEXT_MESSAGE)
+                    String name) {
         var products = name == null ? listProducts.list() : searchProducts.search(name);
         return products.stream().map(ProductResponse::from).toList();
     }

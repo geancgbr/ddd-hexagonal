@@ -4,6 +4,7 @@ import io.github.geancgbr.orders.application.service.NotFoundException;
 import io.github.geancgbr.orders.domain.shared.DomainException;
 import java.util.List;
 import java.util.Map;
+import org.apache.tomcat.util.http.InvalidParameterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSourceResolvable;
@@ -34,6 +35,11 @@ class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     ProblemDetail notFound(NotFoundException exception) {
         return problem(HttpStatus.NOT_FOUND, "Não encontrado", exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidParameterException.class)
+    ProblemDetail invalidParameter(InvalidParameterException exception) {
+        return problem(HttpStatus.BAD_REQUEST, "Parâmetros inválidos", "A requisição tem parâmetros malformados");
     }
 
     @ExceptionHandler(Exception.class)

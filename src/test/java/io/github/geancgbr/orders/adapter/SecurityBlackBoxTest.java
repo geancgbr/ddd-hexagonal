@@ -45,7 +45,8 @@ class SecurityBlackBoxTest {
     }
 
     @ParameterizedTest(name = "busca com \"{0}\" não injeta SQL")
-    @ValueSource(strings = {"' OR '1'='1", "'; DROP TABLE products; --", "%' UNION SELECT id, name FROM orders --"})
+    @ValueSource(
+            strings = {"' OR 'a' LIKE 'a", "'; DROP TABLE products; --", "%' UNION SELECT id, name FROM orders --"})
     void sql_injection_in_the_search_is_treated_as_plain_text(String payload) throws Exception {
         registerProduct("Monitor seguro");
 
@@ -56,6 +57,12 @@ class SecurityBlackBoxTest {
         mvc.perform(get("/products").param("name", "monitor seguro"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Monitor seguro"));
+    }
+
+    @Test
+    void sql_injection_with_characters_outside_the_allowlist_is_blocked_before_reaching_the_database()
+            throws Exception {
+        mvc.perform(get("/products").param("name", "' OR '1'='1")).andExpect(status().isBadRequest());
     }
 
     @ParameterizedTest(name = "nome \"{0}\" é recusado")
@@ -101,6 +108,7 @@ class SecurityBlackBoxTest {
                 .andExpect(header().string("X-Frame-Options", "DENY"))
                 .andExpect(header().string("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"))
                 .andExpect(header().string("Referrer-Policy", "no-referrer"))
+                .andExpect(header().string("Cross-Origin-Resource-Policy", "same-origin"))
                 .andExpect(header().exists("Cache-Control"));
     }
 
@@ -109,5 +117,10 @@ class SecurityBlackBoxTest {
         mvc.perform(get("/actuator/health")).andExpect(status().isOk());
         mvc.perform(get("/actuator/env")).andExpect(status().isNotFound());
         mvc.perform(get("/actuator/beans")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void a_null_byte_in_the_search_is_a_bad_request_not_a_server_error() throws Exception {
+        mvc.perform(get("/products").param("name", "abc\u0000def")).andExpect(status().isBadRequest());
     }
 }

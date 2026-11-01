@@ -1,4 +1,4 @@
-.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses sonar
+.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses sonar dast
 
 test:
 	./mvnw -B verify
@@ -44,3 +44,8 @@ licenses: sbom
 
 sonar:
 	./scripts/sonar.sh
+
+dast:
+	mkdir -p target/zap && chmod 777 target/zap
+	docker compose --profile dast run --rm zap
+	@echo "Relatório: target/zap/zap-relatorio.html"

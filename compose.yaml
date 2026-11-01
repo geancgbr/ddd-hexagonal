@@ -44,6 +44,27 @@ services:
     depends_on:
       - app
 
+  zap:
+    image: zaproxy/zap-stable:2.17.0
+    profiles: ["dast"]
+    command:
+      - zap-api-scan.py
+      - -t
+      - http://app:8080/v3/api-docs
+      - -f
+      - openapi
+      - -r
+      - zap-relatorio.html
+      - -w
+      - zap-relatorio.md
+      - -I
+    volumes:
+      - ./target/zap:/zap/wrk:rw
+    networks:
+      - frontend
+    depends_on:
+      - app
+
   sonarqube:
     image: sonarqube:26.10.0.133078-community
     profiles: ["sonar"]
