@@ -9,6 +9,8 @@ import com.jayway.jsonpath.JsonPath;
 import io.github.geancgbr.orders.TestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -19,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
-class OrderApiIntegrationTest {
+class OrderApiBlackBoxTest {
 
     @Autowired
     private WebApplicationContext context;
@@ -79,5 +81,19 @@ class OrderApiIntegrationTest {
     @Test
     void unknown_order_is_404() throws Exception {
         mvc.perform(get("/orders/00000000-0000-0000-0000-000000000000")).andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest(name = "quantidade {0} → HTTP {1}")
+    @CsvSource({"0, 422", "1, 200", "99, 200", "100, 422"})
+    void quantity_boundary_values(int quantity, int expectedStatus) throws Exception {
+        String product = postJson("/products", """
+                {"name": "Cabo USB", "price": 19.90}""", 201);
+        String productId = JsonPath.read(product, "$.id");
+        String order = postJson("/orders", """
+                {"customerId": "cliente-7"}""", 201);
+        String orderId = JsonPath.read(order, "$.id");
+
+        postJson("/orders/" + orderId + "/items", """
+                {"productId": "%s", "quantity": %d}""".formatted(productId, quantity), expectedStatus);
     }
 }
