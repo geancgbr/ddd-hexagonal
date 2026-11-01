@@ -3,12 +3,14 @@ services:
     image: postgres:18-alpine
     environment:
       POSTGRES_DB: orders
-      POSTGRES_USER: orders
-      POSTGRES_PASSWORD: orders
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d orders"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -17,10 +19,15 @@ services:
     build: .
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/orders
-      DB_USER: orders
-      DB_PASSWORD: orders
+      DB_USER: orders_app
+      DB_PASSWORD: orders_app
+      SPRING_FLYWAY_USER: orders_owner
+      SPRING_FLYWAY_PASSWORD: orders_owner
     ports:
       - "8080:8080"
+    networks:
+      - frontend
+      - backend
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,5 +39,12 @@ services:
       API: http://app:8080
     volumes:
       - ./load-tests:/scripts:ro
+    networks:
+      - frontend
     depends_on:
       - app
+
+networks:
+  frontend:
+  backend:
+    internal: true

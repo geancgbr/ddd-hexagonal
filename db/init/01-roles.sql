@@ -1,0 +1,12 @@
+CREATE ROLE orders_owner LOGIN PASSWORD 'orders_owner';
+CREATE ROLE orders_app LOGIN PASSWORD 'orders_app';
+
+REVOKE ALL ON DATABASE orders FROM PUBLIC;
+GRANT CONNECT ON DATABASE orders TO orders_owner, orders_app;
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+ALTER SCHEMA public OWNER TO orders_owner;
+GRANT USAGE ON SCHEMA public TO orders_app;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE orders_owner IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO orders_app;

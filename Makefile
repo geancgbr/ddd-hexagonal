@@ -1,4 +1,4 @@
-.PHONY: test format coverage up down logs demo load stress
+.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses
 
 test:
 	./mvnw -B verify
@@ -26,3 +26,18 @@ load:
 
 stress:
 	docker compose --profile load run --rm k6 run /scripts/estresse.js
+
+privileges:
+	./scripts/least-privilege.sh
+
+sbom:
+	./mvnw -B -q cyclonedx:makeBom
+	@echo "SBOM gerado em target/bom.json"
+
+deps: sbom
+	docker run --rm -v "$(CURDIR)":/src -v trivy-cache:/root/.cache aquasec/trivy:0.76.1 \
+		sbom --quiet --scanners vuln --severity HIGH,CRITICAL --exit-code 1 /src/target/bom.json 2>/dev/null
+
+licenses: sbom
+	docker run --rm -v "$(CURDIR)":/src -v trivy-cache:/root/.cache aquasec/trivy:0.76.1 \
+		sbom --quiet --scanners license /src/target/bom.json 2>/dev/null
