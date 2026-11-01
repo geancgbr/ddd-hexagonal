@@ -8,6 +8,7 @@ import io.github.geancgbr.orders.domain.shared.DomainEvent;
 import io.github.geancgbr.orders.domain.shared.DomainException;
 import io.github.geancgbr.orders.domain.shared.Money;
 import io.github.geancgbr.orders.domain.shared.Quantity;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class Order {
     private final OrderId id;
     private final CustomerId customerId;
     private OrderStatus status;
+    private Coupon coupon;
     private final List<OrderItem> items;
     private final List<DomainEvent> events = new ArrayList<>();
 
@@ -80,8 +82,30 @@ public class Order {
         events.add(new OrderCancelled(id, reason.strip(), Instant.now()));
     }
 
-    public Money total() {
+    public void applyCoupon(Coupon coupon) {
+        this.coupon = coupon;
+    }
+
+    public Optional<Coupon> coupon() {
+        return Optional.ofNullable(coupon);
+    }
+
+    public Money subtotal() {
         return items.stream().map(OrderItem::subtotal).reduce(Money.ZERO, Money::plus);
+    }
+
+    public Money discount() {
+        if (coupon == null) {
+            return Money.ZERO;
+        }
+        return new Money(subtotal()
+                .amount()
+                .multiply(BigDecimal.valueOf(coupon.percentage()))
+                .divide(BigDecimal.valueOf(100)));
+    }
+
+    public Money total() {
+        return new Money(subtotal().amount().subtract(discount().amount()));
     }
 
     public List<DomainEvent> pullEvents() {
