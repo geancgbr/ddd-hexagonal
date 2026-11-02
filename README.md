@@ -2,7 +2,7 @@
 
 Domain-Driven Design (tático) e Arquitetura Hexagonal em uma API de pedidos, com Java 25 e Spring Boot 4.
 
-Lab da **Fase 1** da Pós Tech Software Architecture (FIAP): **Domain Driven Design**, **Arquitetura Hexagonal**, **Qualidade de Software** e **Desenvolvimento Seguro**. O código é original, escrito para praticar os conceitos; não é material do curso. As notas de estudo ficam em [pos-tech-software-architecture](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Domain%20Driven%20Design/Domain%20Driven%20Design.md).
+Lab da **Fase 1** da Pós Tech Software Architecture (FIAP): **Domain Driven Design**, **Arquitetura Hexagonal**, **Qualidade de Software**, **Desenvolvimento Seguro** e **Documentação de Arquitetura**. O código é original, escrito para praticar os conceitos; não é material do curso. As notas de estudo ficam em [pos-tech-software-architecture](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Domain%20Driven%20Design/Domain%20Driven%20Design.md).
 
 ## O que o lab mostra
 
@@ -54,7 +54,7 @@ flowchart LR
     events -. implementa .-> port_events
 ```
 
-As dependências apontam sempre para o centro. O teste `HexagonalArchitectureTest` (ArchUnit) quebra o build se o domínio ou a aplicação passarem a depender de Spring, JPA ou de um adaptador.
+Os diagramas C4 (contexto, contêineres, componentes e implantação) estão em [`docs/c4`](docs/c4/README.md). As dependências apontam sempre para o centro. O teste `HexagonalArchitectureTest` (ArchUnit) quebra o build se o domínio ou a aplicação passarem a depender de Spring, JPA ou de um adaptador.
 
 ```
 src/main/java/io/github/geancgbr/orders
@@ -96,7 +96,7 @@ Violação de regra vira `422` com a mensagem do domínio; recurso inexistente v
 | [QS 06 – Testes de carga](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Qualidade%20de%20Software/Aulas/QS%2006%20-%20Testes%20de%20carga.md) | **k6** com o fluxo de compra completo: `load-tests/carga.js` (uso esperado, p95 < 300 ms e menos de 1% de erros) e `load-tests/estresse.js` (até 500 usuários virtuais, para achar o ponto de degradação) |
 
 ```bash
-make test       # 73 testes + formatação, cobertura e análise estática
+make test       # 75 testes + formatação, cobertura e análise estática
 make coverage   # abre o relatório de cobertura do JaCoCo
 make up         # sobe a aplicação
 make load       # teste de carga com k6 (roda em container)
@@ -149,6 +149,30 @@ make sonar        # SonarQube em http://localhost:9000 (admin/admin)
 make dast         # OWASP ZAP contra a API em execução
 ```
 
+## Documentação de Arquitetura
+
+| Aula | Onde está no projeto |
+|---|---|
+| [DOC 01 – Introdução](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2001%20-%20Introdu%C3%A7%C3%A3o%20%C3%A0%20documenta%C3%A7%C3%A3o%20de%20arquitetura.md) | Os tipos de documento da aula, todos presentes em [`docs/`](docs/README.md): requisitos, HLD, LLD, C4, diagramas de sequência, de classes e de componentes, modelo de dados, documentação de API, manual de instalação, plano de testes, ADRs e DAS. **Automação**, como a aula recomenda: o contrato da API é gerado pelo springdoc (Swagger/OpenAPI) e os diagramas C4 são gerados por script |
+| [DOC 02 – HLD e LLD](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2002%20-%20High-Level%20Design%20%28HLD%29%20e%20Low-Level%20Design%20%28LLD%29.md) | [HLD](docs/hld.md): visão geral, diagramas de contexto e de contêineres, componentes e requisitos de alto nível, sem detalhe de implementação. [LLD](docs/lld.md): diagrama de classes, máquina de estados do pedido, assinatura de cada porta, algoritmo dos totais, fluxograma do cupom, diagramas de sequência, mapa de erros e mapeamento para o banco |
+| [DOC 03 – C4 Model](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2003%20-%20Modelos%20e%20diagramas%20de%20arquitetura%20-%20C4%20Model.md) | [Modelo C4](docs/c4/README.md) em **Structurizr DSL**: um só arquivo gera Contexto, Contêineres, Componentes, a visão dinâmica de aplicar cupom e a de Implantação. O nível de Código, opcional, é o diagrama de classes do LLD. `make c4` valida e regenera as imagens; `make c4-local` abre o modelo no navegador |
+| [DOC 04 – Requisitos](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2004%20-%20Requisitos%20funcionais%20e%20n%C3%A3o%20funcionais.md) | [10 requisitos funcionais e 11 não funcionais](docs/requisitos.md), com prioridade, métrica e **rastreabilidade**: cada um aponta para o teste ou a ferramenta que o comprova, e os não funcionais trazem o resultado medido (p95, vulnerabilidades, cobertura). O que ficou fora do escopo também está registrado |
+| [DOC 05 – ADRs](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2005%20-%20Architecture%20Decision%20Records%20%28ADRs%29.md) | [10 ADRs](docs/adr/README.md) com contexto, decisão, alternativas e consequências: arquitetura hexagonal, PostgreSQL com Flyway, eventos em processo, cupons em memória, Testcontainers, menor privilégio, CSRF desligado, documentação como código. A [ADR-0009](docs/adr/0009-autenticacao-oauth2-jwt.md) (OAuth2/JWT) está como **Proposta**, para mostrar o ciclo de vida |
+| [DOC 06 – DAS](https://github.com/geancgbr/pos-tech-software-architecture/blob/notas/P%C3%B3s%20Tech%20-%20Software%20Architecture/Fase%201%20-%20Arquitetura%20de%20Software/Documenta%C3%A7%C3%A3o%20de%20Arquitetura%20de%20Solu%C3%A7%C3%B5es/Aulas/DOC%2006%20-%20DAS%20%28Design%20Approval%20Sheet%29.md) | [DAS](docs/das.md) com os 11 elementos da aula: identificação, contexto, requisitos, diagramas, ADRs, plano de testes e monitoramento, modelo de dados (diagrama ER), documentação de API com exemplos reais, instalação por ambiente, continuidade e backup (`make backup` / `make restore`, testados) e segurança e compliance (inclui LGPD). Registra também a aprovação e os riscos aceitos |
+
+A documentação também é verificada no build. `OpenApiContractTest` compara o contrato versionado em [`docs/api/openapi.json`](docs/api/openapi.json) com o que a aplicação publica e falha se houver diferença. Para gerar o contrato com os status certos (201, 204, 400, 404, 422, 500), os endpoints e o tratamento de erros passaram a declarar `@ResponseStatus`. `make docs-check` renderiza todos os diagramas Mermaid para pegar erro de sintaxe.
+
+![Componentes](docs/c4/componentes.png)
+
+```bash
+make c4           # valida o modelo C4 e regenera os diagramas
+make c4-local     # Structurizr em http://localhost:8081
+make openapi      # atualiza o contrato OpenAPI versionado
+make docs-check   # confere a sintaxe dos diagramas Mermaid
+make backup       # pg_dump do banco em backups/
+make restore      # restaura o backup mais recente (ou FILE=...)
+```
+
 ## Como rodar
 
 Pré-requisitos: Docker e JDK 25.
@@ -159,8 +183,9 @@ make demo    # roteiro completo: catálogo, pedido, regras violadas e eventos
 make down    # derruba tudo e apaga os dados
 ```
 
-
 ## API
+
+Contrato completo em [`docs/api/openapi.json`](docs/api/openapi.json) e, com a aplicação de pé, em `http://localhost:8080/v3/api-docs`.
 
 | Método | Caminho | Corpo |
 |---|---|---|
@@ -176,4 +201,4 @@ make down    # derruba tudo e apaga os dados
 
 ## Stack
 
-Java 25 · Spring Boot 4.1 · Spring Data JPA · PostgreSQL 18 · Flyway · JUnit 5 · AssertJ · ArchUnit · Testcontainers · Cucumber · JaCoCo · k6 · Spring Security · SpotBugs + FindSecBugs · SonarQube · OWASP ZAP · CycloneDX · Trivy · Spotless (palantir-java-format) · Docker Compose
+Java 25 · Spring Boot 4.1 · Spring Data JPA · PostgreSQL 18 · Flyway · JUnit 5 · AssertJ · ArchUnit · Testcontainers · Cucumber · JaCoCo · k6 · Spring Security · SpotBugs + FindSecBugs · SonarQube · OWASP ZAP · CycloneDX · Trivy · springdoc-openapi · Structurizr · Mermaid · Spotless (palantir-java-format) · Docker Compose

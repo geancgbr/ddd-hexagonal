@@ -34,3 +34,10 @@ build/
 
 ### OS ###
 .DS_Store
+
+### Backups locais ###
+backups/
+
+### Structurizr local ###
+docs/c4/.structurizr/
+docs/c4/workspace.json

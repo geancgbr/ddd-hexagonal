@@ -17,6 +17,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -28,21 +29,25 @@ class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler(DomainException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     ProblemDetail businessRule(DomainException exception) {
         return problem(HttpStatus.UNPROCESSABLE_CONTENT, "Regra de negócio violada", exception.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     ProblemDetail notFound(NotFoundException exception) {
         return problem(HttpStatus.NOT_FOUND, "Não encontrado", exception.getMessage());
     }
 
     @ExceptionHandler(InvalidParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail invalidParameter(InvalidParameterException exception) {
         return problem(HttpStatus.BAD_REQUEST, "Parâmetros inválidos", "A requisição tem parâmetros malformados");
     }
 
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ProblemDetail unexpected(Exception exception) {
         log.error("Erro inesperado", exception);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", "Não foi possível processar a requisição");

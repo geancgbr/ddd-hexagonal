@@ -1,4 +1,6 @@
-.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses sonar dast
+STRUCTURIZR := structurizr/structurizr:2026.10.26
+
+.PHONY: test format coverage up down logs demo load stress privileges sbom deps licenses sonar dast openapi c4 c4-local docs-check backup restore
 
 test:
 	./mvnw -B verify
@@ -49,3 +51,25 @@ dast:
 	mkdir -p target/zap && chmod 777 target/zap
 	docker compose --profile dast run --rm zap
 	@echo "Relatório: target/zap/zap-relatorio.html"
+
+openapi:
+	./mvnw -B -q test -Dtest=OpenApiContractTest -Dsurefire.failIfNoSpecifiedTests=false -Dmaven.test.failure.ignore=true
+	cp target/openapi.json docs/api/openapi.json
+	@echo "Contrato atualizado em docs/api/openapi.json"
+
+backup:
+	./scripts/backup.sh
+
+restore:
+	./scripts/restore.sh $(FILE)
+
+c4:
+	./scripts/c4.sh
+
+c4-local:
+	@echo "Structurizr em http://localhost:8081 (Ctrl+C para sair)"
+	docker run --rm -p 8081:8080 -v "$(CURDIR)/docs/c4":/usr/local/structurizr $(STRUCTURIZR) local
+
+docs-check:
+	./scripts/docs-check.sh
+
